@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Add, Remove } from "@material-ui/icons";
 import styled from "styled-components";
 import Announcement from "../components/Announcement";
@@ -5,6 +6,11 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import Newsletter from "../components/Newsletter";
 import { mobile } from "../responsive";
+import { useParams } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchProduct } from "../redux/apiCalls";
+import {addItem} from "../redux/cartRedux";
+import swal from "sweetalert"
 
 const Container = styled.div``;
 
@@ -116,6 +122,42 @@ const Button = styled.button`
 `;
 
 const Product = () => {
+  const [productItems, setProduct] = useState([]);
+  const [quantity, setQuantity] = useState(1);
+  const { product } = useSelector((state) => state.product);
+  const dispatch = useDispatch();
+
+  const {id} =useParams();
+
+  useEffect(() => {
+    fetchProduct(dispatch, id);
+    setProduct(product);
+  }, [product, dispatch, id]);
+
+  const updateQuantity = (type) => {
+    if(type === "plus") {
+      setQuantity(quantity + 1);
+    }
+    else if(type === "minus"){
+      setQuantity(quantity - 1 < 1 ? 1 : quantity - 1)
+    }
+  }
+
+  const addToCart = () => {
+    let newItem = {
+      productName: productItems.productName,
+      price: productItems.price,
+      quantity: quantity
+    }
+    if(dispatch(addItem(newItem))){
+      swal("Success","Product added to cart successfully", "success");
+    }
+    else {
+      swal("Fail", "There was error while you were adding to cart!, Please, try again", "fail");
+    }
+
+  }
+
   return (
     <Container>
       <Navbar />
@@ -125,40 +167,18 @@ const Product = () => {
           <Image src="https://i.ibb.co/S6qMxwr/jean.jpg" />
         </ImgContainer>
         <InfoContainer>
-          <Title>Denim Jumpsuit</Title>
+          <Title>{productItems.productName}</Title>
           <Desc>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec
-            venenatis, dolor in finibus malesuada, lectus ipsum porta nunc, at
-            iaculis arcu nisi sed mauris. Nulla fermentum vestibulum ex, eget
-            tristique tortor pretium ut. Curabitur elit justo, consequat id
-            condimentum ac, volutpat ornare.
+           {productItems.description}
           </Desc>
-          <Price>$ 20</Price>
-          <FilterContainer>
-            <Filter>
-              <FilterTitle>Color</FilterTitle>
-              <FilterColor color="black" />
-              <FilterColor color="darkblue" />
-              <FilterColor color="gray" />
-            </Filter>
-            <Filter>
-              <FilterTitle>Size</FilterTitle>
-              <FilterSize>
-                <FilterSizeOption>XS</FilterSizeOption>
-                <FilterSizeOption>S</FilterSizeOption>
-                <FilterSizeOption>M</FilterSizeOption>
-                <FilterSizeOption>L</FilterSizeOption>
-                <FilterSizeOption>XL</FilterSizeOption>
-              </FilterSize>
-            </Filter>
-          </FilterContainer>
+          <Price>ksh {productItems.price}</Price>
           <AddContainer>
             <AmountContainer>
-              <Remove />
-              <Amount>1</Amount>
-              <Add />
+              <Remove onClick={()=> updateQuantity("minus")} />
+              <Amount>{quantity}</Amount>
+              <Add onClick={()=> updateQuantity("plus")} />
             </AmountContainer>
-            <Button>ADD TO CART</Button>
+            <Button onClick={() => addToCart()}>ADD TO CART</Button>
           </AddContainer>
         </InfoContainer>
       </Wrapper>

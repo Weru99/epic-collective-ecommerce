@@ -4,6 +4,8 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { mobile } from "../responsive";
+import { useSelector } from "react-redux";
+import { useState, useEffect } from "react";
 
 const Container = styled.div`
   height: 60px;
@@ -68,6 +70,13 @@ const MenuItem = styled.div`
 `;
 
 const Navbar = () => {
+
+  const [totalProducts, setTotalProducts] = useState(0);
+  const cartItems = useSelector((state) => state.cartItems.value)
+
+  useEffect(() => {
+    setTotalProducts(cartItems.reduce((total, item) => total + (Number(item.quantity)), 0));
+  }, [])
   return (
     <Container>
       <Wrapper>
@@ -90,7 +99,7 @@ const Navbar = () => {
           </Link>
           <MenuItem>
             <Link to="/cart">
-              <Badge badgeContent={2} color="primary">
+              <Badge badgeContent={totalProducts} color="primary">
                 <ShoppingCartOutlined />
               </Badge>
             </Link>

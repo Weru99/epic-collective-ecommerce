@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { popularProducts } from "../data";
 import Product from "./Product";
 import { useSelector, useDispatch } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { fetchProducts } from "../redux/apiCalls";
 
 
@@ -14,17 +14,19 @@ const Container = styled.div`
 `;
 
 const Products = () => {
+  const [productsItems, setProducts] = useState([]);
   const { products } = useSelector((state) => state.products);
   const dispatch = useDispatch();
 
   useEffect(() => {
     fetchProducts(dispatch);
+    setProducts(products)
   },[dispatch]);
   
   return (
     <Container>
-      {products && products.map((item) => (
-        <Product item={item} key={item.id} />
+      {productsItems && productsItems.map((item, index) => (
+        <Product item={item} key={index} />
       ))}
     </Container>
   );

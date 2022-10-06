@@ -13,7 +13,6 @@ const router = require("express").Router();
 router.post("/", uploadImages.array('images', 4), async (req, res) => {
 
   let imagesArray = [];
-  console.log(req.body.images)
 
   if(req.files) {
     req.files.forEach(element => {

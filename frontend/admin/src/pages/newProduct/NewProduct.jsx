@@ -40,7 +40,7 @@ export default function NewProduct() {
   return (
     <div className="newProduct">
       <h1 className="addProductTitle">New Product</h1>
-      <form className="addProductForm" onSubmit={handleSubmit}>
+      <form className="addProductForm" onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="addProductItem">
           <label>Image</label>
           <input type="file" multiple id="file" onChange={(e) => setImages(pre => [ ...e.target.files ])} />

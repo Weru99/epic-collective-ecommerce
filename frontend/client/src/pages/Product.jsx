@@ -158,13 +158,15 @@ const Product = () => {
 
   }
 
+  console.log(productItems)
+
   return (
     <Container>
       <Navbar />
       <Announcement />
       <Wrapper>
         <ImgContainer>
-          <Image src="https://i.ibb.co/S6qMxwr/jean.jpg" />
+          <Image src={`http://localhost:5000/${productItems.images}`} />
         </ImgContainer>
         <InfoContainer>
           <Title>{productItems.productName}</Title>

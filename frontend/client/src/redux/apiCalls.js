@@ -1,5 +1,6 @@
 import { loginFailure, loginStart, loginSuccess, registerFailure, registerStart, registerSuccess } from "./userRedux";
 import {productFetchStart, productFetchSuccess, productFetchFail} from "./productsReducer";
+import {makePaymentStart,makePaymentSuccess,makePaymentFailure } from "./mpesaReducer";
 import { getProductStart, getProductSuccess, getProductFailure} from "./productReducer";
 import { publicRequest, userRequest } from "../requestMethods";
 
@@ -42,3 +43,13 @@ export const fetchProduct = async (dispatch,id) => {
     dispatch(getProductFailure());
   }
 };
+
+export const mpesaPayment = async (dispatch, phoneNumber, amount) => {
+  dispatch(makePaymentStart);
+  try{
+    const res = await userRequest.get(`/mpesa/simulate/${phoneNumber}/${amount}`)
+    dispatch(makePaymentSuccess(res.data));
+  }catch(error){
+    dispatch(makePaymentFailure());
+  }
+}

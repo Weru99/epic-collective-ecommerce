@@ -1,12 +1,14 @@
-// import { Add, Remove } from "@material-ui/icons";
-import { useSelector } from "react-redux";
+import { Add, Remove, Delete } from "@material-ui/icons";
+import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
 import Announcement from "../components/Announcement";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { mobile } from "../responsive";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import MpesaPaymentModal from "../modal/MpesaPaymentModal";
+import { updateItem, removeItem } from '../redux/cartRedux';
 
 const KEY = process.env.REACT_APP_STRIPE;
 
@@ -155,6 +157,7 @@ const Button = styled.button`
   background-color: black;
   color: white;
   font-weight: 600;
+  cursor: pointer;
 `;
 
 const Cart = () => {
@@ -162,14 +165,42 @@ const Cart = () => {
   const [cartProducts, setCartProducts] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [totalProducts, setTotalProducts] = useState(0);
+  const [modal, setModal] = useState(false);
 
   const cartItems = useSelector((state) => state.cartItems.value);
+  const user = useSelector((state) => state.user.currentUser);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setCartProducts(cartItems);
     setTotalPrice(cartItems.reduce((total, item) => total + (Number(item.quantity) * Number(item.price)), 0))
     setTotalProducts(cartItems.reduce((total, item) => total + (Number(item.quantity)), 0))
   }, [cartItems]);
+
+  const updateQuantity = (opt, quantity, product) => {
+    if (opt === '+') {
+        dispatch(updateItem({...product, quantity: quantity + 1}))
+    }
+    if (opt === '-') {
+        dispatch(updateItem({...product, quantity: quantity - 1 === 0 ? 1 : quantity - 1}))
+    }
+}
+
+const removeCartItem = (product) => {
+    dispatch(removeItem(product))
+}
+
+  const toggleModal = () => {
+    if(user){
+      setModal(!modal);
+    }
+    else{
+      navigate('/login');
+    }
+    
+  };
 
   return (  
     <Container>
@@ -194,20 +225,21 @@ const Cart = () => {
                       <b>Product:</b> {product.productName}
                     </ProductName>
                     <ProductSize>
-                      <b>price:</b> {product.price}
+                      <b>price:</b>ksh. {product.price}
                     </ProductSize>
                   </Details>
                 </ProductDetail>
                 <PriceDetail>
                   <ProductAmountContainer>
-                    {/* <Add />
+                    <Add onClick={() => updateQuantity('+', product.quantity, product)}/>
                     <ProductAmount>{product.quantity}</ProductAmount>
-                    <Remove /> */}
+                    <Remove onClick={() => updateQuantity('-', product.quantity, product)}/>
                   </ProductAmountContainer>
                   <ProductPrice>
-                    ksh {product.price * product.quantity}
+                    ksh. {product.price * product.quantity}
                   </ProductPrice>
                 </PriceDetail>
+                <Delete onClick={() => removeCartItem(product)}/>
               </Product>
             ))}
             <Hr />
@@ -222,18 +254,8 @@ const Cart = () => {
               <SummaryItemText>Total</SummaryItemText>
               <SummaryItemPrice>ksh. {totalPrice}</SummaryItemPrice>
             </SummaryItem>
-            {/* <StripeCheckout
-              name="Epic Collective"
-              image="https://avatars.githubusercontent.com/u/1486366?v=4"
-              billingAddress
-              shippingAddress
-              description={`Your total is $${cart.total}`}
-              amount={cart.total * 100}
-              token={onToken}
-              stripeKey={KEY}
-            >
-            </StripeCheckout> */}
-            <Button>CHECKOUT NOW</Button>
+            <Button onClick={toggleModal}>CHECKOUT NOW</Button>
+            {modal && <MpesaPaymentModal amount={totalPrice} closeModal={toggleModal} />}
           </Summary>
         </Bottom>
       </Wrapper>
